@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import InvoiceField from './InvoiceField.js'
+import Testing from './testing'
 //import Todo from './todo.js'
 
 
@@ -16,7 +17,7 @@ class App extends Component {
         <p className="App-intro">
           Invoice Name
         </p>
-        <InvoiceField />
+        <Testing />
       </div>
     );
   }
