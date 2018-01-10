@@ -4,21 +4,22 @@ import './App.css';
 
 class Testing extends Component
 {
-componentDidMount()
-{
-	
-	console.log(fetch('/api/users/0'));
-}
-render()
-{
-
-	//this.componentDidMount();
-	return (
-		<div>
-
-		</div>
-	);
-}
+	componentDidMount()
+	{
+		// nothing :p	
+	}
+	render()
+	{
+		fetch('/api/users/delete/44').then(res => res.json()).then(res => {
+			console.log(res);
+		});
+		
+		return (
+			<div>
+				testing thing
+			</div>
+		);
+	}
 
 }
 

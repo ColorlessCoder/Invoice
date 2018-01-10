@@ -9,6 +9,7 @@ class InvoiceField extends Component
 {
   constructor(props){
     super(props);
+
     this.state={
       items : [],
       current : {
@@ -18,9 +19,30 @@ class InvoiceField extends Component
         total : null,
       },
       total : 0,
+      invoice_name: ''
     };
+    fetch('/api/items/'+this.props.invoice_id).then(res => res.json()).then(res => {
+      console.log("hi",res);
+      this.setState(
+      {
+        items : res,
+        invoice_name : this.props.invoice_name,
+        total : this.props.invoice_total
+      }
+      );
+    });
   }
-
+  updateInvoice()
+  {
+    var obj = {
+      id : this.props.invoice_id,
+      name : this.state.invoice_name,
+      total: this.state.total
+    };
+    
+    fetch('/api/invoices/edit/'+JSON.stringify(obj)).then(res => res.json()).then(res => {
+    });
+  }
   handleEdit(did,event,type)
   {
     var Items= this.state.items;
@@ -38,6 +60,9 @@ class InvoiceField extends Component
         prev.total= prev.rate * prev.hrs;
         Total+= prev.total;
         Items[i] = prev;
+        fetch('/api/items/edit/'+JSON.stringify(Items[i])).then(res => res.json()).then(res => {
+        });
+        break;
       }
     }
     this.setState(
@@ -46,6 +71,7 @@ class InvoiceField extends Component
       total : Total
     }
     );
+    this.updateInvoice();
   }
 
   handleDelete(did)
@@ -58,6 +84,8 @@ class InvoiceField extends Component
       if(prev.id==did)
       {
        Total-=prev.total;
+       fetch('/api/items/delete/'+did).then(res => res.json()).then(res => {
+        });
        Items.splice(i,1);
        break;
       }
@@ -68,6 +96,7 @@ class InvoiceField extends Component
       total : Total
     }
     );
+    this.updateInvoice();
   }
 
   handleChange(type,event)
@@ -98,8 +127,18 @@ class InvoiceField extends Component
       rate : cur.rate,
       total : cur.total,
       id : Date.now()
+    };
+    var newObj2 ={
+      name : cur.name,
+      invoice_id : this.props.invoice_id,
+      hrs : cur.hrs,
+      rate : cur.rate,
+      total : cur.total,
+      id : Date.now()
     }
     prev=prev.concat(newObj);
+    fetch('/api/items/add/'+JSON.stringify(newObj2)).then(res => res.json()).then(res => {
+        });
     cur.name='';
     cur.hrs='';
     cur.rate='';
@@ -111,25 +150,39 @@ class InvoiceField extends Component
           total : Total
         }
     );
+    this.updateInvoice();
   }
 
 
   render()
   {
+    console.log(this.state);
     return (
       <div>
+      <h2>{this.state.invoice_name}</h2>
+      <table>
+      <tr>
+      <th>Product Name</th>
+      <th>Rate/hr</th>
+      <th>Hours</th>
+      <th>Total</th>
+      <th>  </th>
+      </tr>
       <Description handleEdit={(a,b,c) => this.handleEdit(a,b,c)} handleDelete={(a) => this.handleDelete(a)} items={this.state.items}/>
        
-      <table style={{margin : 0 , padding : 0}}><tr>
-       <td><input name='name' onChange= {(event) => this.handleChange("name",event)} value={this.state.current.name}/></td>
-       <td><input name='rate' onChange= {(event) => this.handleChange("rate",event)} value={this.state.current.rate}/></td>
-       <td><input name='hrs' onChange= {(event) => this.handleChange("hrs",event)} value={this.state.current.hrs}/></td>
-       <td><input name='total' onChange= {(event) => this.handleChange("total",event)} value={this.state.current.total}/></td>
+      <tr>
+       <td><input placeholder='Product Name' name='name' onChange= {(event) => this.handleChange("name",event)} value={this.state.current.name}/></td>
+       <td><input placeholder='Rate' name='rate' onChange= {(event) => this.handleChange("rate",event)} value={this.state.current.rate}/></td>
+       <td><input placeholder='Hours' name='hrs' onChange= {(event) => this.handleChange("hrs",event)} value={this.state.current.hrs}/></td>
+       <td><input placeholder='Total' name='total' onChange= {(event) => this.handleChange("total",event)} value={this.state.current.total}/></td>
+       <td> <button onClick={() => this.handleClick()}  style={{background: 'green', color: 'white'}}> Add </button ></td>
        </tr>
        <tr>
-       <td> <button onClick={() => this.handleClick()} style={{height : 25 ,width : 172 , padding : 0}} > Add </button ></td>
-       <td> <button onClick={this.handleSubmit} style={{height : 25 ,width : 172 , padding : 0}} > Save </button ></td>
+       <td> <button onClick={this.props.handleBack} style={{background: 'Blue', color: 'white'}} > Invoice List </button ></td>
+       <td> <button onClick={()=>this.props.handleDelete(this.props.invoice_id)} style={{background: 'red', color: 'white'}} > Delete </button ></td>
+       <td></td>
        <td> Total : {this.state.total} </td>
+       <td></td>
        </tr>
        </table>
       </div>
