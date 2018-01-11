@@ -13,10 +13,10 @@ class InvoiceField extends Component
     this.state={
       items : [],
       current : {
-        name : null,
+        name : '',
         rate : null,
         hrs : null,
-        total : null,
+        total : 0,
       },
       total : 0,
       invoice_name: ''
@@ -34,12 +34,13 @@ class InvoiceField extends Component
   }
   updateInvoice()
   {
+    const tt=this.state.total-this.state.current.total;
     var obj = {
       id : this.props.invoice_id,
       name : this.state.invoice_name,
-      total: this.state.total
+      total: this.state.total,
     };
-    
+    console.log(obj,tt);
     fetch('/api/invoices/edit/'+JSON.stringify(obj)).then(res => res.json()).then(res => {
     });
   }
@@ -83,11 +84,11 @@ class InvoiceField extends Component
       var prev= Items[i];
       if(prev.id==did)
       {
-       Total-=prev.total;
+        console.log(prev);
+       Total=Total-prev.total;
        fetch('/api/items/delete/'+did).then(res => res.json()).then(res => {
         });
        Items.splice(i,1);
-       break;
       }
     }
     this.setState(
@@ -96,7 +97,14 @@ class InvoiceField extends Component
       total : Total
     }
     );
-    this.updateInvoice();
+    console.log("DELETE",this.state);
+    var obj = {
+      id : this.props.invoice_id,
+      name : this.state.invoice_name,
+      total: Total-this.state.current.total, 
+    };  
+    fetch('/api/invoices/edit/'+JSON.stringify(obj)).then(res => res.json()).then(res => {
+    });
   }
 
   handleChange(type,event)
@@ -143,7 +151,7 @@ class InvoiceField extends Component
     cur.hrs='';
     cur.rate='';
     Total += cur.total;
-    cur.total='';
+    cur.total=0;
     this.setState({
           items : prev,
           current : cur,
